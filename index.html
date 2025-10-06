@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flujo de compra IMHPNL - Simulación Visual</title>
+    <title>Flujo de Compra IMHPNL - Simulación Visual</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
@@ -34,31 +36,31 @@
         <!-- Título principal y barra de progreso -->
         <header class="w-full max-w-3xl mb-8">
             <h1 class="text-3xl font-extrabold text-gray-900 text-center mb-2">
-                Simulación del flujo de Compra
+                Simulación del Flujo de Compra
             </h1>
             <p class="text-center text-gray-500">
-                L.P. IMHPNL → Acceso a plataforma
+                L.P. IMHPNL → Acceso a Plataforma
             </p>
             
-            <!-- Indicador de Pasos (Step Indicator) -->
+            <!-- Indicador de Pasos  -->
             <div id="flow-indicator" class="flow-indicator flex justify-between items-center mt-6 p-3 bg-white rounded-xl shadow-inner">
-                <!-- Los indicadores se generarán con JS -->
+                <!-- Los indicadores se generarán dinámicamente con JS -->
             </div>
         </header>
 
-        <!-- Contenedor del Flujo (Main Content Area) -->
+        <!-- Contenedor del Flujo  -->
         <main class="w-full max-w-3xl bg-white step-card rounded-2xl p-6 md:p-10">
 
             <!-- 1. L.P. IMHPNL (Menú) - Step 1 -->
             <section id="step-menu" data-step="1" class="hidden">
                 <h2 class="text-2xl font-semibold mb-6 text-indigo-700">1. Elegir Modalidad</h2>
                 <div class="space-y-4 md:space-y-0 md:flex md:space-x-6">
-                    <button onclick="selectProduct('Presencial')"
+                    <button onclick="seleccionarProducto('Presencial')"
                             class="product-option w-full p-6 text-left bg-indigo-50 hover:bg-indigo-100 border-2 border-indigo-200 rounded-xl transition duration-300 transform hover:scale-[1.02]">
                         <p class="font-bold text-lg text-indigo-800">L.P. Presencial</p>
                         <p class="text-sm text-indigo-600">Acceso al programa en modalidad física.</p>
                     </button>
-                    <button onclick="selectProduct('Práctica (Zoom)')"
+                    <button onclick="seleccionarProducto('Práctica (Zoom)')"
                             class="product-option w-full p-6 text-left bg-indigo-50 hover:bg-indigo-100 border-2 border-indigo-200 rounded-xl transition duration-300 transform hover:scale-[1.02]">
                         <p class="font-bold text-lg text-indigo-800">L.P. Pract. (Zoom)</p>
                         <p class="text-sm text-indigo-600">Acceso al programa en modalidad remota (Zoom).</p>
@@ -82,7 +84,7 @@
                         <li>Testimonios de exalumnos.</li>
                     </ul>
                 </div>
-                <button onclick="changeStep(3)"
+                <button onclick="cambiarPaso(3)"
                         class="btn-primary w-full mt-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700">
                     Proceder al Check-Out
                 </button>
@@ -95,10 +97,10 @@
                     <label for="customer-email" class="block text-gray-700 font-medium">Correo Electrónico:</label>
                     <input type="email" id="customer-email" placeholder="tu.correo@ejemplo.com" required
                            class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-indigo-500 transition duration-150"
-                           oninput="validateEmail()">
+                           oninput="validarCorreo()">
                     <p id="email-error" class="text-red-500 text-sm hidden">Por favor, introduce un correo válido.</p>
                 </div>
-                <button id="btn-checkout-next" disabled onclick="changeStep(4)"
+                <button id="btn-checkout-next" disabled onclick="cambiarPaso(4)"
                         class="btn-primary w-full mt-8 py-3 bg-indigo-500 text-white font-bold rounded-xl opacity-50 cursor-not-allowed">
                     Continuar al Método de Pago
                 </button>
@@ -124,7 +126,7 @@
                     (Simulación: Al presionar "Pagar Ahora", el cobro siempre es exitoso en este flujo demo.)
                 </p>
 
-                <button onclick="simulatePaymentSuccess()"
+                <button onclick="simularPagoExitoso()"
                         class="btn-primary w-full mt-8 py-3 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600">
                     Pagar Ahora (Simular Cobro Exitoso)
                 </button>
@@ -156,7 +158,7 @@
                     </div>
                 </div>
 
-                <button onclick="changeStep(6)"
+                <button onclick="cambiarPaso(6)"
                         class="btn-primary w-full mt-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700">
                     Continuar al Acceso
                 </button>
@@ -185,7 +187,7 @@
                 <p class="text-lg font-bold text-green-600 mt-6">
                     ¡FLUJO COMPLETADO CON ÉXITO!
                 </p>
-                <button onclick="resetFlow()"
+                <button onclick="restablecerFlujo()"
                         class="mt-4 text-sm text-gray-500 hover:text-indigo-500 underline">
                     Reiniciar Simulación
                 </button>
@@ -195,8 +197,201 @@
     </div>
 
     <script>
+        // Definición de variables globales para el estado del flujo
+        let pasoActual = 1;
+        let productoSeleccionado = null;
+        let correoCliente = '';
 
+        // Definición de los pasos del flujo
+        const pasos = [
+            { id: 'step-menu', title: 'Menú (LP)' },
+            { id: 'step-product', title: 'Pág. Producto' },
+            { id: 'step-checkout', title: 'Check-Out (Mail)' },
+            { id: 'step-payment', title: 'Método de Pago' },
+            { id: 'step-success', title: 'Cobro Exitoso' },
+            { id: 'step-platform', title: 'Acceso Plataforma' }
+        ];
 
+        /**
+         * Inicializa los indicadores de paso en el HTML.
+         */
+        function inicializarIndicadores() {
+            const contenedorIndicador = document.getElementById('flow-indicator');
+            contenedorIndicador.innerHTML = pasos.map((paso, index) => `
+                <div class="flex items-center space-x-2">
+                    <span id="indicator-${index + 1}" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 text-xs font-bold">
+                        ${index + 1}
+                    </span>
+                    <span class="hidden sm:inline text-sm text-gray-600">${paso.title}</span>
+                </div>
+                ${index < pasos.length - 1 ? '<div class="flex-grow h-0.5 bg-gray-200 mx-1"></div>' : ''}
+            `).join('');
+            actualizarEstilosIndicadores();
+        }
+
+        /**
+         * Actualiza la visualización del paso actual y el contenido de la página.
+         */
+        function actualizarVistaPaso() {
+            // Ocultar todos los pasos y mostrar solo el actual
+            pasos.forEach((paso, index) => {
+                const section = document.getElementById(paso.id);
+                if (section) {
+                    // Animación básica de transición
+                    if (index + 1 === pasoActual) {
+                        section.classList.remove('hidden');
+                        section.style.opacity = '0';
+                        setTimeout(() => {
+                            section.style.opacity = '1';
+                        }, 50);
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                }
+            });
+            
+            // Llenar contenido específico de los pasos
+            if (pasoActual === 2) {
+                document.getElementById('product-name-display').textContent = productoSeleccionado || 'No Seleccionado';
+            }
+            if (pasoActual === 5) {
+                document.getElementById('access-email-display').textContent = correoCliente;
+            }
+            if (pasoActual === 6) {
+                document.getElementById('login-email').value = correoCliente;
+            }
+
+            actualizarEstilosIndicadores();
+        }
+
+        /**
+         * Actualiza los colores de los indicadores de paso.
+         */
+        function actualizarEstilosIndicadores() {
+            pasos.forEach((paso, index) => {
+                const indicador = document.getElementById(`indicator-${index + 1}`);
+                if (!indicador) return;
+
+                const esActivo = index + 1 === pasoActual;
+                const esCompletado = index + 1 < pasoActual;
+
+                if (esActivo) {
+                    indicador.className = 'w-8 h-8 flex items-center justify-center rounded-full bg-indigo-500 text-white text-xs font-bold scale-110';
+                } else if (esCompletado) {
+                    indicador.className = 'w-8 h-8 flex items-center justify-center rounded-full bg-green-500 text-white text-xs font-bold';
+                } else {
+                    indicador.className = 'w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 text-xs font-bold';
+                }
+            });
+        }
+
+        /**
+         * Función para cambiar al paso siguiente.
+         */
+        function cambiarPaso(numeroPaso) {
+            if (numeroPaso >= 1 && numeroPaso <= pasos.length) {
+                pasoActual = numeroPaso;
+                actualizarVistaPaso();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        /**
+         *  selección de producto en el Paso 1.
+         */
+        function seleccionarProducto(producto) {
+            productoSeleccionado = producto;
+            const opciones = document.querySelectorAll('.product-option');
+            const botonComprar = document.getElementById('btn-menu-comprar');
+
+            opciones.forEach(btn => {
+                const estaSeleccionado = btn.textContent.includes(producto);
+                btn.classList.toggle('border-indigo-600', estaSeleccionado);
+                btn.classList.toggle('bg-indigo-50', !estaSeleccionado);
+                btn.classList.toggle('bg-indigo-100', estaSeleccionado);
+            });
+
+            // Habilitar botón Comprar
+            botonComprar.disabled = false;
+            botonComprar.classList.remove('opacity-50', 'cursor-not-allowed');
+            botonComprar.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+            botonComprar.onclick = () => cambiarPaso(2); // Pasar a página de producto
+        }
+
+        /**
+         * Valida el formato del correo electrónico en el Paso 3.
+         */
+        function validarCorreo() {
+            const inputCorreo = document.getElementById('customer-email');
+            const errorCorreo = document.getElementById('email-error');
+            const botonSiguiente = document.getElementById('btn-checkout-next');
+            const valorCorreo = inputCorreo.value.trim();
+            const esValido = /\S+@\S+\.\S+/.test(valorCorreo);
+
+            if (esValido) {
+                correoCliente = valorCorreo;
+                errorCorreo.classList.add('hidden');
+                botonSiguiente.disabled = false;
+                botonSiguiente.classList.remove('opacity-50', 'cursor-not-allowed');
+                botonSiguiente.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+            } else {
+                correoCliente = '';
+                errorCorreo.classList.remove('hidden');
+                botonSiguiente.disabled = true;
+                botonSiguiente.classList.add('opacity-50', 'cursor-not-allowed');
+                botonSiguiente.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+            }
+        }
+
+        /**
+         * Simula el cobro exitoso y la lógica de post-pago.
+         */
+        function simularPagoExitoso() {
+
+            // 1. Asignar acceso al mail del cliente (Simulado con la variable correoCliente)
+            // 2. Enviar correo con link de ingreso y asignación/creación de password (Simulado visualmente)
+            
+            // Pasamos al paso de éxito
+            cambiarPaso(5);
+        }
+
+        
+         //Reinicia el flujo al estado inicial.
+         
+        function restablecerFlujo() {
+            pasoActual = 1;
+            productoSeleccionado = null;
+            correoCliente = '';
+
+            // Restablecer el botón Comprar
+            const botonComprar = document.getElementById('btn-menu-comprar');
+            botonComprar.disabled = true;
+            botonComprar.classList.add('opacity-50', 'cursor-not-allowed');
+            botonComprar.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+            botonComprar.onclick = null;
+            
+            // Restablecer estilos de selección de producto
+            document.querySelectorAll('.product-option').forEach(btn => {
+                btn.classList.remove('border-indigo-600', 'bg-indigo-100');
+                btn.classList.add('bg-indigo-50');
+            });
+
+            // Limpiar campo de email
+            document.getElementById('customer-email').value = '';
+            document.getElementById('email-error').classList.add('hidden');
+            const botonSiguiente = document.getElementById('btn-checkout-next');
+            botonSiguiente.disabled = true;
+            botonSiguiente.classList.add('opacity-50', 'cursor-not-allowed');
+            botonSiguiente.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+
+            actualizarVistaPaso();
+        }
+
+        // Inicializar el flujo al cargar la página
+        window.onload = () => {
+            inicializarIndicadores();
+            actualizarVistaPaso();
+        };
     </script>
 </body>
 </html>
